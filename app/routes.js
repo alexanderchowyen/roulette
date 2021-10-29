@@ -9,11 +9,23 @@ module.exports = function(app, passport, db) {
 
     // PROFILE SECTION =========================
     app.get('/profile', isLoggedIn, function(req, res) {
-        db.collection('messages').find().toArray((err, result) => {
+        db.collection('bets').find().toArray((err, bets) => {
           if (err) return console.log(err)
+          let wins = 0
+          let lose = 0
+          for (let i = 0; i < bets.length; i++){
+            if(bets[i].win === true){
+              lose++
+            }else{
+              wins++
+            }
+          }
+          console.log(lose, wins)
           res.render('profile.ejs', {
             user : req.user,
-            messages: result
+            bets: bets,
+            lose: lose,
+            wins: wins
           })
         })
     });
@@ -28,14 +40,22 @@ module.exports = function(app, passport, db) {
 
     app.post('/bets', (req, res) => {
       console.log("bet color", req.body.color)
+      let userWin = false 
+      let rollColor = "black"
       const rollNumber = Math.random()
-      if (rollNumber < (20/37) && req.body.color === "green"){
-        console.log("youWin")
+      if(rollNumber < (1/37)){
+        rollColor = "green"
+      }else if (rollNumber < (18/37)){
+        rollColor = "red"
       }
-      db.collection('bets').save({color: req.body.color, amount: req.body.amount,}, (err, result) => {
+      console.log(req.body.color, rollColor)
+      if(rollColor === req.body.color){
+        userWin = true
+      }
+      db.collection('bets').save({color: req.body.color, amount: req.body.amount, win: userWin,}, (err, result) => {
         if (err) return console.log(err)
         console.log('saved to database')
-        res.send({status:"ok"})
+        res.send({status:"ok", win: userWin})
       })
     })
 

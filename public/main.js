@@ -19,8 +19,11 @@ Array.from(betButtons).forEach(function(element) {
           if (response.ok) return response.json()
         })
         .then(data => {
-          console.log(data)
-          window.location.reload(true)
+          if(data.win === true){
+            document.getElementById("outcome").innerHTML = "You Win!"
+          }else{ 
+            document.getElementById("outcome").innerHTML = "You Lose!"
+          }
         })
       });
 });
